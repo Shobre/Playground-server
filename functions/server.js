@@ -1,5 +1,6 @@
 const admin = require("firebase-admin");
 const rp = require("request-promise");
+const { request } = require("graphql-request");
 // require all dependencies to set up server
 const express = require("express");
 admin.initializeApp();
@@ -22,60 +23,68 @@ function configureServer() {
   // Simple graphql schema
   const typeDefs = gql`
     type Query {
-        hello: String
-        fuck: String
-        test: Situation
+      hello: String
+      fuck: String
+      Response: Response
     }
 
-    type Situation {
-        StatusCode: Int
-        Message: String
-        ExecutionTime: String
-        ResponseData: ResponseData
+    type Response {
+      StatusCode: Int
+      Message: String
+      ExecutionTime: String
+      ResponseData: ResponseData
     }
 
     type ResponseData {
-        TrafficTypes: [TrafficType]
+      TrafficTypes: [TrafficType]
     }
 
     type TrafficType {
-        Id: ID
-        Name: String
-        Type: String
-        TrafficStatus: Boolean
-        StatusIcon: String
-        Events: [Event]
-        Expanded: Boolean
-        HasPlannedEvent: Boolean
+      Id: ID
+      Name: String
+      Type: String
+      TrafficStatus: Boolean
+      StatusIcon: String
+      Events: [Event]
+      Expanded: Boolean
+      HasPlannedEvent: Boolean
     }
 
     type Event {
-        EventId: ID
-        Message: String
-        LineNumbers: LineNumbers
-        Expanded: Boolean
-        Planned: Boolean
-        SortIndex: Int
-        TrafficLine: String
-        EventInfoUrl: String
-        Status: String
-        StatisIcon: String
+      EventId: ID
+      Message: String
+      LineNumbers: LineNumbers
+      Expanded: Boolean
+      Planned: Boolean
+      SortIndex: Int
+      TrafficLine: String
+      EventInfoUrl: String
+      Status: String
+      StatisIcon: String
     }
 
     type LineNumbers {
-        InputDataIsOptional: Boolean
-        Text: String
+      InputDataIsOptional: Boolean
+      Text: String
     }
-
   `;
+  const query = `{
+    Response{
+      StatusCode
+    }
+  }`;
   // Very simple resolver that returns "world" for the hello query
   const resolvers = {
     Query: {
       hello: () => "world",
       fuck: () => "you",
-      test: async _ => {
-        console.log(rp({ uri: baseURL }).toJSON());
-        return rp({ uri: baseURL });
+      Response: async _ => {
+        request(baseURL, query, "response")
+          .then(data => {
+            console.log(data);
+            return data;
+          })
+          .catch(error => console.log(error));
       }
     }
   };
