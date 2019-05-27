@@ -10,9 +10,7 @@ const cors = require("cors");
 
 const fetch = require("node-fetch");
 const key = "e4a3634b747345528afea507ad02678c";
-const baseURL = new URL(
-  `http://api.sl.se/api2/trafficsituation.json?key=${key}`
-);
+const baseURL = `http://api.sl.se/api2/trafficsituation.json?key=${key}`;
 
 function configureServer() {
   // invoke express to create our server
